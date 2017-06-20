@@ -35,7 +35,7 @@ func (r *requestBase) responseType() response {
 func forgeRequest(name string) request {
 	return &requestBase{
 		RequestType: name,
-		rType:       responseBase{},
+		rType:       &responseBase{},
 	}
 }
 
@@ -54,7 +54,7 @@ func forgeSetCurrentScene(name string) request {
 	return &setCurrentScene{
 		requestBase: requestBase{
 			RequestType: "SetCurrentScene",
-			rType:       responseBase{},
+			rType:       &responseBase{},
 		},
 		SceneName: name,
 	}
@@ -75,14 +75,14 @@ func (c *Client) submitRequest(r request) (response, error) {
 	return resp, nil
 }
 
-func (c *Client) GetSceneList() (GetSceneListResponse, error) {
-	resp, err := c.submitRequest(forgeRequestWithExpectedResponse("GetSceneList", GetSceneListResponse{}))
+func (c *Client) GetSceneList() (*GetSceneListResponse, error) {
+	resp, err := c.submitRequest(forgeRequestWithExpectedResponse("GetSceneList", &GetSceneListResponse{}))
 	if err != nil {
-		return GetSceneListResponse{}, err
+		return nil, err
 	}
-	respCorrect, ok := resp.(GetSceneListResponse)
+	respCorrect, ok := resp.(*GetSceneListResponse)
 	if ok == false {
-		return GetSceneListResponse{}, fmt.Errorf("obsws: unexpected response from server: %#v", resp)
+		return nil, fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return respCorrect, nil
 }

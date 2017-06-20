@@ -1,6 +1,9 @@
 package obsws
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type response interface {
 	error() error
@@ -14,7 +17,7 @@ type responseBase struct {
 }
 
 func (r responseBase) error() error {
-	if r.Status == "OK" {
+	if strings.ToLower(r.Status) == "ok" {
 		return nil
 	}
 	return fmt.Errorf("obsws: status:%s error:%s", r.Status, r.Error)
@@ -37,10 +40,10 @@ type Scene struct {
 type GetSceneListResponse struct {
 	CurrentScene string  `json:"current-scene"`
 	Scenes       []Scene `json:"scenes"`
-	responseBase
+	*responseBase
 }
 
 type GetCurrentScene struct {
 	Scene
-	responseBase
+	*responseBase
 }
