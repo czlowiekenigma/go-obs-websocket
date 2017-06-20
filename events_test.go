@@ -1,7 +1,6 @@
 package obsws
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
@@ -35,7 +34,7 @@ func (s *EventSuite) TestTimecodeParse(c *C) {
 
 func (s *EventSuite) TestExtractTimecode(c *C) {
 	itdata := map[string]string{
-		"Invalid Timecode format '.*':.*": "0:0",
+		"obsws: invalid Timecode format '.*':.*": "0:0",
 	}
 
 	for errorMatch, tc := range itdata {
@@ -47,30 +46,71 @@ func (s *EventSuite) TestExtractTimecode(c *C) {
 }
 
 func (s *EventSuite) TestEventExtraction(c *C) {
-	tdata := map[string]event{
-		`{"update-type":"foo"} `:                                  event{EventType: "foo", streamTC: -1, recTC: -1},
-		`{"update-type":"foo","stream-timecode":"01:00:00.000"} `: event{EventType: "foo", streamTC: 1 * time.Hour, recTC: -1},
-		`{"update-type":"foo","rec-timecode":"00:01:00.000"} `:    event{EventType: "foo", recTC: 1 * time.Minute, streamTC: -1},
+	tdata := map[string]rawEvent{
+		`{"update-type":"ScenesChanged"} `:                                  rawEvent{eventType: "ScenesChanged", streamTC: -1, recTC: -1},
+		`{"update-type":"ScenesChanged","stream-timecode":"01:00:00.000"} `: rawEvent{eventType: "ScenesChanged", streamTC: 1 * time.Hour, recTC: -1},
+		`{"update-type":"ScenesChanged","rec-timecode":"00:01:00.000"} `:    rawEvent{eventType: "ScenesChanged", recTC: 1 * time.Minute, streamTC: -1},
 	}
 
 	for jsonData, expected := range tdata {
-		res := event{}
-		err := json.Unmarshal([]byte(jsonData), &res)
-		c.Check(err, IsNil)
-		c.Check(res, Equals, expected)
+		res, err := UnmarshalEvent([]byte(jsonData))
+		if c.Check(err, IsNil, Commentf("Unexpected error: %s", err)) == false {
+			continue
+		}
+		c.Check(res.UpdateType(), Equals, expected.UpdateType())
+		stc, okstc := res.StreamTimecode()
+		estc, eokstc := expected.StreamTimecode()
+		c.Check(okstc, Equals, eokstc)
+		c.Check(stc, Equals, estc)
+		rtc, okrtc := res.RecordTimecode()
+		ertc, eokrtc := expected.RecordTimecode()
+		c.Check(rtc, Equals, ertc)
+		c.Check(okrtc, Equals, eokrtc)
 	}
 
 	itdata := map[string]string{
-		"json:.*":                           `{"update-type":42}`,
-		"Invalid Timecode format '.*': .*":  `{"update-type":"foo","stream-timecode":"a"}`,
-		"Invalid Timecode format 'a.*': .*": `{"update-type":"foo","rec-timecode":"a"}`,
+		"obsws: message is not an event":           `{"message-id":1234,"status":"ok","error":""}`,
+		"json:.*":                                  `{"update-type":42}`,
+		"obsws: unknown event type 'foo'":          `{"update-type":"foo"}`,
+		"obsws: invalid Timecode format '.*': .*":  `{"update-type":"SwitchScenes","stream-timecode":"a"}`,
+		"obsws: invalid Timecode format 'a.*': .*": `{"update-type":"SwitchScenes","rec-timecode":"a"}`,
 	}
 
 	for errorMatch, jsonData := range itdata {
-		res := event{recTC: -1, streamTC: -1}
-		err := json.Unmarshal([]byte(jsonData), &res)
+		res, err := UnmarshalEvent([]byte(jsonData))
 		c.Check(err, ErrorMatches, errorMatch, Commentf(jsonData))
-		c.Check(res.streamTC, Equals, time.Duration(-1))
-		c.Check(res.recTC, Equals, time.Duration(-1))
+		c.Check(res, IsNil)
 	}
+}
+
+func (s *EventSuite) TestEventFactory(c *C) {
+
+	tdata := map[Event]string{
+		&EventSwitchScenes{
+			rawEvent:  rawEvent{"SwitchScenes", -1, -1},
+			SceneName: "foo",
+		}: `{"update-type":"SwitchScenes","scene-name":"foo"}`,
+		&EventStreamStatus{
+			rawEvent:         rawEvent{"StreamStatus", -1, -1},
+			Fps:              29.97,
+			Streaming:        true,
+			Recording:        false,
+			PreviewOnly:      false,
+			BytesPerSec:      1234,
+			KBitsPerSec:      1,
+			TotalStreamTime:  122,
+			Strain:           0.001,
+			NumTotalFrames:   200,
+			NumDroppedFrames: 1,
+		}: `{"update-type":"StreamStatus","fps":29.97,"streaming":true,"bytes-per-sec":1234,"kbits-per-sec":1,"preview-only":false,"strain":0.001,"total-stream-time":122,"num-total-frames":200,"num-dropped-frames":1}`,
+	}
+
+	for expected, jsonData := range tdata {
+		res, err := UnmarshalEvent([]byte(jsonData))
+		if c.Check(err, IsNil, Commentf("Unexpected error: %s", err)) == false {
+			continue
+		}
+		c.Check(res, DeepEquals, expected)
+	}
+
 }

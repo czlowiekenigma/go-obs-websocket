@@ -8,6 +8,11 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+type responseData struct {
+	channel chan response
+	rType   response
+}
+
 // A Client connects to a obs-studio websocket to get event and
 // perform request on OBS instance remotely
 type Client struct {
@@ -16,9 +21,10 @@ type Client struct {
 
 	ws *websocket.Conn
 
-	events   chan Event
-	requests chan request
-	frames   chan []byte
+	events       chan Event
+	requests     chan request
+	frames       chan []byte
+	responsesMap map[string]responseData
 }
 
 // NewClient connects to a websocket instance.
@@ -43,10 +49,9 @@ func NewClient(address string, port int) (*Client, error) {
 
 func (c *Client) handleResponse(frame []byte) {
 	//check if the message is an event
-	var ev Event
-	err := json.Unmarshal(frame, &ev)
-	if err != nil && len(ev.UpdateType()) > 0 {
-		// this a nice event
+	ev, err := UnmarshalEvent(frame)
+	if err == nil {
+		//check if use is listening events
 		c.eventChannelLock.RLock()
 		defer c.eventChannelLock.RUnlock()
 		if c.events != nil {
@@ -54,7 +59,29 @@ func (c *Client) handleResponse(frame []byte) {
 		}
 		return
 	}
+	if _, ok := err.(ErrNotEventMessage); ok == false {
+		//handle error
+		panic(fmt.Sprintf("obsws: %s", err))
+	}
 
+	// handle response
+	var respBase responseBase
+	err = json.Unmarshal(frame, &respBase)
+	if err != nil {
+		panic(fmt.Sprintf("obsws: %s'", err))
+	}
+
+	respData, ok := c.responsesMap[respBase.messageID()]
+	if ok == false {
+		panic(fmt.Sprintf("obsws: unknown message-id '%s'", respBase.messageID()))
+	}
+	err = json.Unmarshal(frame, &(respData.rType))
+	if err != nil {
+		panic(fmt.Sprintf("obsws: %s'", err))
+	}
+	respData.channel <- respData.rType
+	delete(c.responsesMap, respBase.messageID())
+	close(respData.channel)
 }
 
 func (c *Client) internalLoop() {
@@ -79,13 +106,20 @@ func (c *Client) internalLoop() {
 		select {
 		case f := <-c.frames:
 			c.handleResponse(f)
-		case _, ok := <-c.requests:
+		case r, ok := <-c.requests:
 			if ok == false {
 				c.requests = nil
 				break
 			}
 			// send the right request, with an UID
 			requestUID++
+			rUID := fmt.Sprintf("%d", requestUID)
+			c.responsesMap[rUID] = responseData{
+				channel: r.getResponseChannel(),
+				rType:   r.responseType(),
+			}
+			r.setMessageID(rUID)
+			websocket.JSON.Send(c.ws, r)
 		}
 
 		// we are closing the for loop
