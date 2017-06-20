@@ -3,6 +3,7 @@ package obsws
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sync"
 
 	"golang.org/x/net/websocket"
@@ -39,8 +40,9 @@ func NewClient(address string, port int) (*Client, error) {
 	}
 
 	res := &Client{
-		ws:       ws,
-		requests: make(chan request),
+		ws:           ws,
+		requests:     make(chan request),
+		responsesMap: make(map[string]responseData),
 	}
 
 	go res.internalLoop()
@@ -61,23 +63,29 @@ func (c *Client) handleResponse(frame []byte) {
 	}
 	if _, ok := err.(ErrNotEventMessage); ok == false {
 		//handle error
-		panic(fmt.Sprintf("obsws: %s", err))
+		if _, ok := err.(ErrUnknownEventType); ok == true {
+			//we only log unknown eventype
+			log.Printf("%s", err)
+			return
+		} else {
+			panic(fmt.Sprintf("obsws: %s", err))
+		}
 	}
 
 	// handle response
 	var respBase responseBase
 	err = json.Unmarshal(frame, &respBase)
 	if err != nil {
-		panic(fmt.Sprintf("obsws: %s'", err))
+		panic(fmt.Sprintf("obsws: %s\n'%s'", err, frame))
 	}
 
 	respData, ok := c.responsesMap[respBase.messageID()]
 	if ok == false {
-		panic(fmt.Sprintf("obsws: unknown message-id '%s'", respBase.messageID()))
+		panic(fmt.Sprintf("obsws: unknown message-id '%s'\n'%s'", respBase.messageID(), frame))
 	}
 	err = json.Unmarshal(frame, &(respData.rType))
 	if err != nil {
-		panic(fmt.Sprintf("obsws: %s'", err))
+		panic(fmt.Sprintf("obsws: %s\n'%s'", err, frame))
 	}
 	respData.channel <- respData.rType
 	delete(c.responsesMap, respBase.messageID())

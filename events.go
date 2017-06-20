@@ -78,6 +78,14 @@ func (e ErrNotEventMessage) Error() string {
 	return "obsws: message is not an event"
 }
 
+type ErrUnknownEventType struct {
+	Type string
+}
+
+func (e ErrUnknownEventType) Error() string {
+	return "obsws: unknown event type '" + e.Type + "'"
+}
+
 // UnmarshalEvent unmarshal an Event formatted in JSON. Cannot use the
 // standard JSON interface as it would be too complicated to implement
 func UnmarshalEvent(data []byte) (Event, error) {
@@ -120,7 +128,7 @@ func UnmarshalEvent(data []byte) (Event, error) {
 	// now we extract the generic part
 	evType, ok := eventFactory[rawE.UpdateType()]
 	if ok == false {
-		return nil, fmt.Errorf("obsws: unknown event type '%s'", rawE.UpdateType())
+		return nil, ErrUnknownEventType{rawE.UpdateType()}
 	}
 
 	evInst := reflect.New(evType)
