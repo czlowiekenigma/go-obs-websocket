@@ -86,19 +86,23 @@ func Execute() error {
 	defer ui.Close()
 
 	SetupLog()
-	defer logfile.Close()
+	defer func() {
+		log.SetOutput(os.Stderr)
+		logfile.Close()
+	}()
 
 	SetUpUI()
+
+	if opts.Verbose == true {
+		log.SetOutput(io.MultiWriter(logfile, myui.Echo))
+	} else {
+		log.SetOutput(logfile)
+	}
 
 	log.Printf("Connecting to %s:%d", opts.Address, opts.Port)
 	c, err := obsws.NewClient(opts.Address, opts.Port)
 	if err != nil {
 		return err
-	}
-	if opts.Verbose == true {
-		log.SetOutput(io.MultiWriter(logfile, myui.Echo))
-	} else {
-		log.SetOutput(logfile)
 	}
 
 	go func() {
@@ -118,18 +122,24 @@ func Execute() error {
 			break
 		}
 		key := (i + 1) % 10
-		myui.Scenes.Items = append(myui.Scenes.Items, fmt.Sprintf("[%d] %s", key, s.Name))
-
-		ui.Handle(fmt.Sprintf("/sys/kbd/%d", key),
+		name := s.Name
+		myui.Scenes.Items = append(myui.Scenes.Items, fmt.Sprintf("[%d] %s", key, name))
+		eventaddress := fmt.Sprintf("/sys/kbd/%d", key)
+		log.Printf("Found scene %d:%s, handling it with %s", key, name, eventaddress)
+		ui.Handle(eventaddress,
 			func(ui.Event) {
-				log.Printf("Switching to scene '%s'", s.Name)
-				err := c.SetCurrentScene(s.Name)
+
+				log.Printf("Switching to scene '%s', %s", name, eventaddress)
+				err := c.SetCurrentScene(name)
 				if err != nil {
-					log.Printf("Could not change to  scene '%s': %s", s.Name, err)
+					log.Printf("Could not change to  scene '%s': %s", name, err)
 				}
 			})
 	}
-
+	myui.Scenes.Height = len(myui.Scenes.Items) + 2
+	myui.Info.Height = len(myui.Scenes.Items) + 2
+	ui.Body.Align()
+	ui.Render(ui.Body)
 	log.Print("Looping ui")
 	ui.Loop()
 
