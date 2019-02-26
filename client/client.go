@@ -1,31 +1,33 @@
-package obsws
+package client
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/defabricated/go-obs-websocket/events"
+	"github.com/defabricated/go-obs-websocket/requests"
+	"github.com/defabricated/go-obs-websocket/responses"
+	"golang.org/x/net/websocket"
 	"log"
 	"sync"
-
-	"golang.org/x/net/websocket"
 )
 
 type responseData struct {
-	channel chan response
-	rType   response
+	channel chan responses.Response
+	rType   responses.Response
 }
 
-// A Client connects to a obs-studio websocket to get event and
-// perform request on OBS instance remotely
 type Client struct {
 	eventChannelLock sync.RWMutex
 	wg               sync.WaitGroup
 
 	ws *websocket.Conn
 
-	events       chan Event
-	requests     chan request
+	events       chan events.Event
+	requests     chan requests.Request
 	frames       chan []byte
 	responsesMap map[string]responseData
+
+	closed bool
 }
 
 // NewClient connects to a websocket instance.
@@ -41,7 +43,7 @@ func NewClient(address string, port int) (*Client, error) {
 
 	res := &Client{
 		ws:           ws,
-		requests:     make(chan request),
+		requests:     make(chan requests.Request),
 		responsesMap: make(map[string]responseData),
 	}
 
@@ -49,9 +51,28 @@ func NewClient(address string, port int) (*Client, error) {
 	return res, nil
 }
 
+func (c *Client) IsClosed() bool {
+	return c.closed
+}
+
+func (c *Client) submitRequest(r requests.Request) (responses.Response, error) {
+	rchan := make(chan responses.Response)
+	r.SetResponseChannel(rchan)
+	c.requests <- r
+	resp, ok := <-rchan
+	if ok == false {
+		return nil, fmt.Errorf("obsws: internal error, response channel closed without response")
+	}
+
+	if err := resp.GetError(); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 func (c *Client) handleResponse(frame []byte) {
 	//check if the message is an event
-	ev, err := UnmarshalEvent(frame)
+	ev, err := events.UnmarshalEvent(frame)
 	if err == nil {
 		//check if use is listening events
 		c.eventChannelLock.RLock()
@@ -61,34 +82,42 @@ func (c *Client) handleResponse(frame []byte) {
 		}
 		return
 	}
-	if _, ok := err.(ErrNotEventMessage); ok == false {
+	if _, ok := err.(events.ErrNotEventMessage); ok == false {
 		//handle error
-		if _, ok := err.(ErrUnknownEventType); ok == true {
+		if _, ok := err.(events.ErrUnknownEventType); ok == true {
 			//we only log unknown eventype
 			log.Printf("%s", err)
 			return
 		} else {
-			panic(fmt.Sprintf("obsws: %s", err))
+			log.Println(fmt.Sprintf("obsws: %s", err))
+			c.Close()
+			return
 		}
 	}
 
 	// handle response
-	var respBase responseBase
+	var respBase responses.ResponseBase
 	err = json.Unmarshal(frame, &respBase)
 	if err != nil {
-		panic(fmt.Sprintf("obsws: %s\n'%s'", err, frame))
+		log.Println(fmt.Sprintf("obsws: %s\n'%s'", err, frame))
+		c.Close()
+		return
 	}
 
-	respData, ok := c.responsesMap[respBase.messageID()]
+	respData, ok := c.responsesMap[respBase.GetMessageID()]
 	if ok == false {
-		panic(fmt.Sprintf("obsws: unknown message-id '%s'\n'%s'", respBase.messageID(), frame))
+		log.Println(fmt.Sprintf("obsws: unknown message-id '%s'\n'%s'", respBase.GetMessageID(), frame))
+		c.Close()
+		return
 	}
 	err = json.Unmarshal(frame, &(respData.rType))
 	if err != nil {
-		panic(fmt.Sprintf("obsws: %s\n'%s'", err, frame))
+		log.Println(fmt.Sprintf("obsws: %s\n'%s'", err, frame))
+		c.Close()
+		return
 	}
 	respData.channel <- respData.rType
-	delete(c.responsesMap, respBase.messageID())
+	delete(c.responsesMap, respBase.GetMessageID())
 	close(respData.channel)
 }
 
@@ -123,10 +152,10 @@ func (c *Client) internalLoop() {
 			requestUID++
 			rUID := fmt.Sprintf("%d", requestUID)
 			c.responsesMap[rUID] = responseData{
-				channel: r.getResponseChannel(),
-				rType:   r.responseType(),
+				channel: r.GetResponseChannel(),
+				rType:   r.GetResponseType(),
 			}
-			r.setMessageID(rUID)
+			r.SetMessageID(rUID)
 			websocket.JSON.Send(c.ws, r)
 		}
 
@@ -141,13 +170,13 @@ func (c *Client) internalLoop() {
 	c.frames = nil
 }
 
-// Authentify performs the authenfication to this websocket instance.
-func (c *Client) Authentify(psswd string) error {
-	return NotYetImplemented()
-}
-
 // Close terminates the connection to the instance
 func (c *Client) Close() {
+	if c.closed {
+		return
+	}
+	c.closed = true
+
 	close(c.requests)
 	// wait to be done
 	c.wg.Wait()
@@ -160,14 +189,14 @@ func (c *Client) Close() {
 }
 
 // EventChannel returns a channel to read Event from
-func (c *Client) EventChannel() <-chan Event {
+func (c *Client) EventChannel() <-chan events.Event {
 	c.eventChannelLock.RLock()
 	if c.events != nil {
 		defer c.eventChannelLock.RUnlock()
 		return c.events
 	}
 
-	res := make(chan chan Event)
+	res := make(chan chan events.Event)
 	go func() {
 		defer close(res)
 		c.eventChannelLock.Lock()
@@ -175,7 +204,7 @@ func (c *Client) EventChannel() <-chan Event {
 		if c.events != nil {
 			res <- c.events
 		}
-		c.events = make(chan Event)
+		c.events = make(chan events.Event)
 		res <- c.events
 	}()
 	c.eventChannelLock.RUnlock()
@@ -183,7 +212,7 @@ func (c *Client) EventChannel() <-chan Event {
 	return events
 }
 
-func (c *Client) eventSender() chan<- Event {
+func (c *Client) eventSender() chan<- events.Event {
 	c.eventChannelLock.RLock()
 	defer c.eventChannelLock.RUnlock()
 	return c.events

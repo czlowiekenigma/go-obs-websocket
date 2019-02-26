@@ -1,4 +1,4 @@
-package obsws
+package events
 
 import (
 	"encoding/json"
@@ -13,17 +13,10 @@ type rawEvent struct {
 	recTC     time.Duration
 }
 
-// Event can be returned from the client at any time
 type Event interface {
-	// UpdateType specifies which kind of event it is
 	UpdateType() string
-	// StreamTimecode specifies the time since the stream started. It
-	// return false if the stream did not yet started.
 	StreamTimecode() (time.Duration, bool)
-	// RecordTimecode specifies the time since the recording
-	// started. It return false of the stream did not yet stated/
 	RecordTimecode() (time.Duration, bool)
-
 	copyFromOther(e Event)
 }
 
@@ -127,7 +120,7 @@ func UnmarshalEvent(data []byte) (Event, error) {
 
 	// now we extract the generic part
 	evType, ok := eventFactory[rawE.UpdateType()]
-	if ok == false {
+	if !ok {
 		return nil, ErrUnknownEventType{rawE.UpdateType()}
 	}
 
@@ -145,53 +138,58 @@ func UnmarshalEvent(data []byte) (Event, error) {
 
 var eventFactory map[string]reflect.Type
 
-type EventSwitchScenes struct {
-	SceneName string `json:"scene-name"`
-	rawEvent
-}
-
-type EventScenesChanged struct {
-	rawEvent
-}
-
-type EventSourceOrderChanged struct {
-	SceneName string `json:"scene-name"`
-	rawEvent
-}
-
-type EventSceneItemAdded struct {
-	SceneName string `json:"scene-name"`
-	ItemName  string `json:"item-name"`
-	rawEvent
-}
-
-type EventSceneItemRemoved struct {
-	SceneName string `json:"scene-name"`
-	ItemName  string `json:"item-name"`
-	rawEvent
-}
-
-type EventStreamStatus struct {
-	Streaming        bool    `json:"streaming"`
-	Recording        bool    `json:"recording"`
-	PreviewOnly      bool    `json:"preview-only"`
-	BytesPerSec      int     `json:"bytes-per-sec"`
-	KBitsPerSec      int     `json:"kbits-per-sec"`
-	Strain           float64 `json:"strain"`
-	TotalStreamTime  int     `json:"total-stream-time"`
-	NumTotalFrames   int     `json:"num-total-frames"`
-	NumDroppedFrames int     `json:"num-dropped-frames"`
-	Fps              float64 `json:"fps"`
-	rawEvent
-}
-
 func init() {
 	eventFactory = map[string]reflect.Type{
-		"SwitchScenes":       reflect.TypeOf(EventSwitchScenes{}),
-		"ScenesChanged":      reflect.TypeOf(EventScenesChanged{}),
-		"SourceOrderChanged": reflect.TypeOf(EventSourceOrderChanged{}),
-		"SceneItemAdded":     reflect.TypeOf(EventSceneItemAdded{}),
-		"SceneItemRemoved":   reflect.TypeOf(EventSceneItemRemoved{}),
-		"StreamStatus":       reflect.TypeOf(EventStreamStatus{}),
+		//Scenes
+		"SwitchScenes": reflect.TypeOf(SwitchScenes{}),
+		"ScenesChanged": reflect.TypeOf(ScenesChanged{}),
+		"SceneCollectionChanged": reflect.TypeOf(SceneCollectionChanged{}),
+		"SceneCollectionListChanged": reflect.TypeOf(SceneCollectionListChanged{}),
+
+		//Transitions
+		"SwitchTransition": reflect.TypeOf(SwitchTransition{}),
+		"TransitionListChanged": reflect.TypeOf(TransitionListChanged{}),
+		"TransitionDurationChanged": reflect.TypeOf(TransitionDurationChanged{}),
+		"TransitionBegin": reflect.TypeOf(TransitionBegin{}),
+
+		//Profiles
+		"ProfileChanged": reflect.TypeOf(ProfileChanged{}),
+		"ProfileListChanged": reflect.TypeOf(ProfileListChanged{}),
+
+		//Streaming
+		"StreamStarting": reflect.TypeOf(StreamStarting{}),
+		"StreamStarted": reflect.TypeOf(StreamStarted{}),
+		"StreamStopping": reflect.TypeOf(StreamStopping{}),
+		"StreamStopped": reflect.TypeOf(StreamStopped{}),
+		"StreamStatus": reflect.TypeOf(StreamStatus{}),
+
+		//Recording
+		"RecordingStarting": reflect.TypeOf(RecordingStarting{}),
+		"RecordingStarted": reflect.TypeOf(RecordingStarted{}),
+		"RecordingStopping": reflect.TypeOf(RecordingStopping{}),
+		"RecordingStopped": reflect.TypeOf(RecordingStopped{}),
+
+		//Replay buffer
+		"ReplayStarting": reflect.TypeOf(ReplayStarting{}),
+		"ReplayStarted": reflect.TypeOf(ReplayStarted{}),
+		"ReplayStopping": reflect.TypeOf(ReplayStopping{}),
+		"ReplayStopped": reflect.TypeOf(ReplayStopped{}),
+
+		//Other
+		"Exiting": reflect.TypeOf(Exiting{}),
+
+		//General
+		"Heartbeat": reflect.TypeOf(Heartbeat{}),
+
+		//Sources
+		"SourceOrderChanged": reflect.TypeOf(SourceOrderChanged{}),
+		"SceneItemAdded": reflect.TypeOf(SceneItemAdded{}),
+		"SceneItemRemoved": reflect.TypeOf(SceneItemRemoved{}),
+		"SceneItemVisibilityChanged": reflect.TypeOf(SceneItemVisibilityChanged{}),
+
+		//Studio mode
+		"PreviewSceneChanged": reflect.TypeOf(PreviewSceneChanged{}),
+		"StudioModeSwitched": reflect.TypeOf(StudioModeSwitched{}),
 	}
 }
+
