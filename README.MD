@@ -4,11 +4,11 @@
 
 go-obs-websocket allows to connect to Open Broadcaster Studio plugin [obs-websocket](https://github.com/Palakis/obs-websocket).
 
-##Installation
+## Installation
 
 `go get github.com/czlowiekenigma/go-obs-websocket`
 
-##Usage
+## Usage
 
 Create a new client using
 ```gotemplate
