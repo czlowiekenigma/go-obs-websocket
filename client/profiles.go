@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/defabricated/go-obs-websocket/requests"
-	"github.com/defabricated/go-obs-websocket/responses"
+	"github.com/czlowiekenigma/go-obs-websocket/requests"
+	"github.com/czlowiekenigma/go-obs-websocket/responses"
 )
 
 func (c *Client) SetCurrentProfile(req *requests.SetCurrentProfile) (err error) {

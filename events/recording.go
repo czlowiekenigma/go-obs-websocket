@@ -15,3 +15,11 @@ type RecordingStopping struct {
 type RecordingStopped struct {
 	rawEvent
 }
+
+type RecordingPaused struct {
+	rawEvent
+}
+
+type RecordingResumed struct {
+	rawEvent
+}

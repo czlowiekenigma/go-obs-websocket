@@ -1,7 +1,7 @@
 package obsws
 
 import (
-	"github.com/defabricated/go-obs-websocket/client"
+	"github.com/czlowiekenigma/go-obs-websocket/client"
 )
 
 func NewClient(address string, port int) (*client.Client, error) {

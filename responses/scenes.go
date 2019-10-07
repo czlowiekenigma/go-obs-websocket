@@ -1,6 +1,6 @@
 package responses
 
-import "github.com/defabricated/go-obs-websocket/scene"
+import "github.com/czlowiekenigma/go-obs-websocket/scene"
 
 type GetCurrentScene struct {
 	*ResponseBase

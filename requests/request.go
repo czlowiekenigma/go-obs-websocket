@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"github.com/defabricated/go-obs-websocket/responses"
+	"github.com/czlowiekenigma/go-obs-websocket/responses"
 	"reflect"
 )
 

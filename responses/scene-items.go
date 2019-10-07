@@ -1,8 +1,8 @@
 package responses
 
 import (
-	"github.com/defabricated/go-obs-websocket/scene"
-	"github.com/defabricated/go-obs-websocket/transforms"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/item"
+	"github.com/czlowiekenigma/go-obs-websocket/transforms"
 )
 
 type GetSceneItemProperties struct {
@@ -19,5 +19,5 @@ type GetSceneItemProperties struct {
 type DuplicateSceneItem struct {
 	*ResponseBase
 	Scene string     `json:"scene"`
-	Item  scene.Item `json:"item"`
+	Item  item.Item `json:"item"`
 }

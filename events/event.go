@@ -141,55 +141,70 @@ var eventFactory map[string]reflect.Type
 func init() {
 	eventFactory = map[string]reflect.Type{
 		//Scenes
-		"SwitchScenes": reflect.TypeOf(SwitchScenes{}),
-		"ScenesChanged": reflect.TypeOf(ScenesChanged{}),
-		"SceneCollectionChanged": reflect.TypeOf(SceneCollectionChanged{}),
+		"SwitchScenes":               reflect.TypeOf(SwitchScenes{}),
+		"ScenesChanged":              reflect.TypeOf(ScenesChanged{}),
+		"SceneCollectionChanged":     reflect.TypeOf(SceneCollectionChanged{}),
 		"SceneCollectionListChanged": reflect.TypeOf(SceneCollectionListChanged{}),
 
 		//Transitions
-		"SwitchTransition": reflect.TypeOf(SwitchTransition{}),
-		"TransitionListChanged": reflect.TypeOf(TransitionListChanged{}),
+		"SwitchTransition":          reflect.TypeOf(SwitchTransition{}),
+		"TransitionListChanged":     reflect.TypeOf(TransitionListChanged{}),
 		"TransitionDurationChanged": reflect.TypeOf(TransitionDurationChanged{}),
-		"TransitionBegin": reflect.TypeOf(TransitionBegin{}),
+		"TransitionBegin":           reflect.TypeOf(TransitionBegin{}),
 
 		//Profiles
-		"ProfileChanged": reflect.TypeOf(ProfileChanged{}),
+		"ProfileChanged":     reflect.TypeOf(ProfileChanged{}),
 		"ProfileListChanged": reflect.TypeOf(ProfileListChanged{}),
 
 		//Streaming
 		"StreamStarting": reflect.TypeOf(StreamStarting{}),
-		"StreamStarted": reflect.TypeOf(StreamStarted{}),
+		"StreamStarted":  reflect.TypeOf(StreamStarted{}),
 		"StreamStopping": reflect.TypeOf(StreamStopping{}),
-		"StreamStopped": reflect.TypeOf(StreamStopped{}),
-		"StreamStatus": reflect.TypeOf(StreamStatus{}),
+		"StreamStopped":  reflect.TypeOf(StreamStopped{}),
+		"StreamStatus":   reflect.TypeOf(StreamStatus{}),
 
 		//Recording
 		"RecordingStarting": reflect.TypeOf(RecordingStarting{}),
-		"RecordingStarted": reflect.TypeOf(RecordingStarted{}),
+		"RecordingStarted":  reflect.TypeOf(RecordingStarted{}),
 		"RecordingStopping": reflect.TypeOf(RecordingStopping{}),
-		"RecordingStopped": reflect.TypeOf(RecordingStopped{}),
+		"RecordingStopped":  reflect.TypeOf(RecordingStopped{}),
+		"RecordingPaused":   reflect.TypeOf(RecordingPaused{}),
+		"RecordingResumed":  reflect.TypeOf(RecordingResumed{}),
 
 		//Replay buffer
 		"ReplayStarting": reflect.TypeOf(ReplayStarting{}),
-		"ReplayStarted": reflect.TypeOf(ReplayStarted{}),
+		"ReplayStarted":  reflect.TypeOf(ReplayStarted{}),
 		"ReplayStopping": reflect.TypeOf(ReplayStopping{}),
-		"ReplayStopped": reflect.TypeOf(ReplayStopped{}),
+		"ReplayStopped":  reflect.TypeOf(ReplayStopped{}),
 
 		//Other
 		"Exiting": reflect.TypeOf(Exiting{}),
 
 		//General
-		"Heartbeat": reflect.TypeOf(Heartbeat{}),
+		"Heartbeat":              reflect.TypeOf(Heartbeat{}),
+		"BroadcastCustomMessage": reflect.TypeOf(BroadcastCustomMessage{}),
 
 		//Sources
-		"SourceOrderChanged": reflect.TypeOf(SourceOrderChanged{}),
-		"SceneItemAdded": reflect.TypeOf(SceneItemAdded{}),
-		"SceneItemRemoved": reflect.TypeOf(SceneItemRemoved{}),
-		"SceneItemVisibilityChanged": reflect.TypeOf(SceneItemVisibilityChanged{}),
+		"SourceCreated":                reflect.TypeOf(SourceCreated{}),
+		"SourceDestroyed":              reflect.TypeOf(SourceDestroyed{}),
+		"SourceVolumeChanged":          reflect.TypeOf(SourceVolumeChanged{}),
+		"SourceMuteStateChanged":       reflect.TypeOf(SourceMuteStateChanged{}),
+		"SourceAudioSyncOffsetChanged": reflect.TypeOf(SourceAudioSyncOffsetChanged{}),
+		"SourceAudioMixersChanged":     reflect.TypeOf(SourceAudioMixersChanged{}),
+		"SourceRenamed":                reflect.TypeOf(SourceRenamed{}),
+		"SourceFilterAdded":            reflect.TypeOf(SourceFilterAdded{}),
+		"SourceFilterRemoved":          reflect.TypeOf(SourceFilterRemoved{}),
+		"SourceFiltersReordered":       reflect.TypeOf(SourceFiltersReordered{}),
+		"SourceOrderChanged":           reflect.TypeOf(SourceOrderChanged{}),
+		"SceneItemAdded":               reflect.TypeOf(SceneItemAdded{}),
+		"SceneItemRemoved":             reflect.TypeOf(SceneItemRemoved{}),
+		"SceneItemVisibilityChanged":   reflect.TypeOf(SceneItemVisibilityChanged{}),
+		"SceneItemTransformChanged":    reflect.TypeOf(SceneItemTransformChanged{}),
+		"SceneItemSelected":            reflect.TypeOf(SceneItemSelected{}),
+		"SceneItemDeselected":          reflect.TypeOf(SceneItemDeselected{}),
 
 		//Studio mode
 		"PreviewSceneChanged": reflect.TypeOf(PreviewSceneChanged{}),
-		"StudioModeSwitched": reflect.TypeOf(StudioModeSwitched{}),
+		"StudioModeSwitched":  reflect.TypeOf(StudioModeSwitched{}),
 	}
 }
-

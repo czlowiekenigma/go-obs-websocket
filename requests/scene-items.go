@@ -1,8 +1,8 @@
 package requests
 
 import (
-	"github.com/defabricated/go-obs-websocket/scene"
-	"github.com/defabricated/go-obs-websocket/transforms"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/item"
+	"github.com/czlowiekenigma/go-obs-websocket/transforms"
 	"github.com/guregu/null"
 )
 
@@ -33,12 +33,12 @@ type ResetSceneItem struct {
 type DeleteSceneItem struct {
 	RequestBase
 	Scene string     `json:"scene"`
-	Item  scene.Item `json:"item"`
+	Item  item.Item `json:"item"`
 }
 
 type DuplicateSceneItem struct {
 	RequestBase
 	FromScene string     `json:"from-scene,omitempty"`
 	ToScene   string     `json:"to-scene,omitempty"`
-	Item      scene.Item `json:"item"`
+	Item      item.Item `json:"item"`
 }

@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/defabricated/go-obs-websocket/requests"
-	"github.com/defabricated/go-obs-websocket/responses"
+	"github.com/czlowiekenigma/go-obs-websocket/requests"
+	"github.com/czlowiekenigma/go-obs-websocket/responses"
 )
 
 func (c *Client) GetSourcesList() (resp *responses.GetSourcesList, err error) {
@@ -35,7 +35,7 @@ func (c *Client) GetSourceTypesList() (resp *responses.GetSourceTypesList, err e
 }
 
 func (c *Client) GetVolume(req *requests.GetVolume) (resp *responses.GetVolume, err error) {
-	raw, err := c.submitRequest(requests.ForgeRequestWithExpectedResponse(&responses.GetVolume{}))
+	raw, err := c.submitRequest(requests.ForgeRequestWithExpectedResponse(&responses.GetVolume{}, req))
 	if err != nil {
 		return
 	}

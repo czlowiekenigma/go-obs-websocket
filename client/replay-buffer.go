@@ -1,6 +1,6 @@
 package client
 
-import "github.com/defabricated/go-obs-websocket/requests"
+import "github.com/czlowiekenigma/go-obs-websocket/requests"
 
 func (c *Client) StartStopReplayBuffer() (err error) {
 	_, err = c.submitRequest(requests.ForgeRequest(&requests.StartStopReplayBuffer{}))

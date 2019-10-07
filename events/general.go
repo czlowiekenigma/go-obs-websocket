@@ -14,3 +14,9 @@ type Heartbeat struct {
 	TotalRecordBytes  int    `json:"total-record-bytes,omitempty"`
 	TotalRecordFrames int    `json:"total-record-frames,omitempty"`
 }
+
+type BroadcastCustomMessage struct {
+	rawEvent
+	Realm string      `json:"realm"`
+	Data  interface{} `json:"data"`
+}

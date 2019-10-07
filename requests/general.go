@@ -15,4 +15,8 @@ type SetFilenameFormatting struct {
 	FilenameFormatting string `json:"filename-formatting"`
 }
 
-
+type BroadcastCustomMessage struct {
+	RequestBase
+	Realm string
+	Data  interface{}
+}

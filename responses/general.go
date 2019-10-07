@@ -2,6 +2,7 @@ package responses
 
 import (
 	"encoding/json"
+	"github.com/czlowiekenigma/go-obs-websocket/stats"
 	"strings"
 )
 
@@ -50,6 +51,24 @@ type GetAuthRequired struct {
 }
 
 type GetFilenameFormatting struct {
-	ResponseBase
+	*ResponseBase
 	FilenameFormatting string `json:"filename-formatting"`
+}
+
+type GetStats struct {
+	*ResponseBase
+	Stats *stats.Stats `json:"stats"`
+}
+
+type GetVideoInfo struct {
+	*ResponseBase
+	BaseWidth    int     `json:"baseWidth"`
+	BaseHeight   int     `json:"baseHeight"`
+	OutputWidth  int     `json:"outputWidth"`
+	OutputHeight int     `json:"outputHeight"`
+	ScaleType    string  `json:"scaleType"`
+	FPS          float64 `json:"fps"`
+	VideoFormat  string  `json:"videoFormat"`
+	ColorSpace   string  `json:"colorSpace"`
+	ColorRange   string  `json:"colorRange"`
 }

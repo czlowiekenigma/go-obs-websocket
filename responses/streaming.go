@@ -1,6 +1,6 @@
 package responses
 
-import "github.com/defabricated/go-obs-websocket/stream"
+import "github.com/czlowiekenigma/go-obs-websocket/stream"
 
 type GetStreamingStatus struct {
 	*ResponseBase

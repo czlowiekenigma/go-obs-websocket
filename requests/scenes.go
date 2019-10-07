@@ -1,6 +1,6 @@
 package requests
 
-import "github.com/defabricated/go-obs-websocket/scene"
+import "github.com/czlowiekenigma/go-obs-websocket/scene/item"
 
 type SetCurrentScene struct {
 	RequestBase
@@ -14,5 +14,5 @@ type GetCurrentScene struct {
 type ReorderSceneItems struct {
 	RequestBase
 	Scene string       `json:"scene,omitempty"`
-	Items []scene.Item `json:"items"`
+	Items []item.Item `json:"items"`
 }

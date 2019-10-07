@@ -1,6 +1,6 @@
 package events
 
-import "github.com/defabricated/go-obs-websocket/transition"
+import "github.com/czlowiekenigma/go-obs-websocket/transition"
 
 type SwitchTransition struct {
 	rawEvent

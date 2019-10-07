@@ -1,11 +1,11 @@
 package responses
 
 import (
-	"github.com/defabricated/go-obs-websocket/scene/source"
-	"github.com/defabricated/go-obs-websocket/scene/source/filter"
-	"github.com/defabricated/go-obs-websocket/scene/source/text"
-	"github.com/defabricated/go-obs-websocket/scene/source/text/align"
-	"github.com/defabricated/go-obs-websocket/scene/source/text/vertical-align"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/source"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/source/filter"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/source/text"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/source/text/align"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/source/text/vertical-align"
 )
 
 type GetSourcesList struct {

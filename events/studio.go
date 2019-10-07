@@ -1,6 +1,6 @@
 package events
 
-import "github.com/defabricated/go-obs-websocket/scene/source"
+import "github.com/czlowiekenigma/go-obs-websocket/scene/source"
 
 type PreviewSceneChanged struct {
 	rawEvent

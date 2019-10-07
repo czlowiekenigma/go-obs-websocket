@@ -1,6 +1,6 @@
 package requests
 
-import "github.com/defabricated/go-obs-websocket/stream"
+import "github.com/czlowiekenigma/go-obs-websocket/stream"
 
 type StartStopStreaming struct {
 	RequestBase

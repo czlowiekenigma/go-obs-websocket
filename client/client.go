@@ -3,9 +3,9 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/defabricated/go-obs-websocket/events"
-	"github.com/defabricated/go-obs-websocket/requests"
-	"github.com/defabricated/go-obs-websocket/responses"
+	"github.com/czlowiekenigma/go-obs-websocket/events"
+	"github.com/czlowiekenigma/go-obs-websocket/requests"
+	"github.com/czlowiekenigma/go-obs-websocket/responses"
 	"golang.org/x/net/websocket"
 	"log"
 	"sync"
@@ -135,7 +135,10 @@ func (c *Client) internalLoop() {
 		go func() {
 			// read a response asynchronously
 			frame := make([]byte, 0, 100)
-			websocket.Message.Receive(c.ws, &frame)
+			if err := websocket.Message.Receive(c.ws, &frame); err != nil {
+				c.Close()
+				return
+			}
 			// send response to channel
 			c.frames <- frame
 		}()
@@ -156,7 +159,11 @@ func (c *Client) internalLoop() {
 				rType:   r.GetResponseType(),
 			}
 			r.SetMessageID(rUID)
-			websocket.JSON.Send(c.ws, r)
+
+			if err := websocket.JSON.Send(c.ws, r); err != nil {
+				c.Close()
+				return
+			}
 		}
 
 		// we are closing the for loop
