@@ -2,8 +2,8 @@ package events
 
 import (
 	"github.com/czlowiekenigma/go-obs-websocket/scene/item"
-	"github.com/czlowiekenigma/go-obs-websocket/scene/source"
 	"github.com/czlowiekenigma/go-obs-websocket/scene/source/filter"
+	"github.com/czlowiekenigma/go-obs-websocket/scene/source/mixer"
 )
 
 type SourceCreated struct {
@@ -41,9 +41,9 @@ type SourceAudioSyncOffsetChanged struct {
 
 type SourceAudioMixersChanged struct {
 	rawEvent
-	Name           string          `json:"sourceName"`
-	Mixers         []*source.Mixer `json:"mixers"`
-	HexMixersValue string          `json:"hexMixersValue"`
+	Name           string         `json:"sourceName"`
+	Mixers         []*mixer.Mixer `json:"mixers"`
+	HexMixersValue string         `json:"hexMixersValue"`
 }
 
 type SourceRenamed struct {

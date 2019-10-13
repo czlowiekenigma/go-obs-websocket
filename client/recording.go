@@ -21,6 +21,16 @@ func (c *Client) StopRecording() (err error) {
 	return
 }
 
+func (c *Client) PauseRecording() (err error) {
+	_, err = c.submitRequest(requests.ForgeRequest(&requests.PauseRecording{}))
+	return
+}
+
+func (c *Client) ResumeRecording() (err error) {
+	_, err = c.submitRequest(requests.ForgeRequest(&requests.ResumeRecording{}))
+	return
+}
+
 func (c *Client) SetRecordingFolder(req *requests.SetRecordingFolder) (err error) {
 	_, err = c.submitRequest(requests.ForgeRequest(req))
 	return
