@@ -160,3 +160,12 @@ type SetSourceFilterSettings struct {
 	FilterName     string      `json:"filterName"`
 	FilterSettings interface{} `json:"filterSettings"`
 }
+
+type TakeSourceScreenshot struct {
+	RequestBase
+	SourceName         string `json:"sourceName"`
+	EmbedPictureFormat string `json:"embedPictureFormat"`
+	SaveToFilePath     string `json:"saveToFilePath"`
+	Width              int    `json:"width"`
+	Height             int    `json:"height"`
+}

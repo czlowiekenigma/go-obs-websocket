@@ -109,3 +109,10 @@ type GetSourceFilters struct {
 	*ResponseBase
 	Filters []*filter.Filter `json:"filters"`
 }
+
+type TakeSourceScreenshot struct {
+	*ResponseBase
+	SourceName string `json:"sourceName"`
+	Img        string `json:"img"`
+	ImageFile  string `json:"imageFile"`
+}

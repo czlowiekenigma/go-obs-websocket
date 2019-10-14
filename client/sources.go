@@ -13,8 +13,7 @@ func (c *Client) GetSourcesList() (resp *responses.GetSourcesList, err error) {
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetSourcesList)
-	if !ok {
+	if resp, ok = raw.(*responses.GetSourcesList); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -27,8 +26,7 @@ func (c *Client) GetSourceTypesList() (resp *responses.GetSourceTypesList, err e
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetSourceTypesList)
-	if !ok {
+	if resp, ok = raw.(*responses.GetSourceTypesList); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -41,8 +39,7 @@ func (c *Client) GetVolume(req *requests.GetVolume) (resp *responses.GetVolume, 
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetVolume)
-	if !ok {
+	if resp, ok = raw.(*responses.GetVolume); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -60,8 +57,7 @@ func (c *Client) GetMute(req *requests.GetMute) (resp *responses.GetMute, err er
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetMute)
-	if !ok {
+	if resp, ok = raw.(*responses.GetMute); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -84,8 +80,7 @@ func (c *Client) GetSyncOffset(req *requests.GetSyncOffset) (resp *responses.Get
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetSyncOffset)
-	if !ok {
+	if resp, ok = raw.(*responses.GetSyncOffset); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -98,8 +93,7 @@ func (c *Client) GetSourceSettings(req *requests.GetSourceSettings) (resp *respo
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetSourceSettings)
-	if !ok {
+	if resp, ok = raw.(*responses.GetSourceSettings); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -112,8 +106,7 @@ func (c *Client) SetSourceSettings(req *requests.SetSourceSettings) (resp *respo
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.SetSourceSettings)
-	if !ok {
+	if resp, ok = raw.(*responses.SetSourceSettings); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -126,8 +119,7 @@ func (c *Client) GetTextGDIPlusProperties(req *requests.GetTextGDIPlusProperties
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetTextGDIPlusProperties)
-	if !ok {
+	if resp, ok = raw.(*responses.GetTextGDIPlusProperties); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -145,8 +137,7 @@ func (c *Client) GetTextFreetype2Properties(req *requests.GetTextFreetype2Proper
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetTextFreetype2Properties)
-	if !ok {
+	if resp, ok = raw.(*responses.GetTextFreetype2Properties); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -164,8 +155,7 @@ func (c *Client) GetBrowserSourceProperties(req *requests.GetBrowserSourceProper
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetBrowserSourceProperties)
-	if !ok {
+	if resp, ok = raw.(*responses.GetBrowserSourceProperties); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -183,8 +173,7 @@ func (c *Client) GetSpecialSources() (resp *responses.GetSpecialSources, err err
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetSpecialSources)
-	if !ok {
+	if resp, ok = raw.(*responses.GetSpecialSources); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -197,8 +186,7 @@ func (c *Client) GetSourceFilters(req *requests.GetSourceFilters) (resp *respons
 	}
 
 	var ok bool
-	resp, ok = raw.(*responses.GetSourceFilters)
-	if !ok {
+	if resp, ok = raw.(*responses.GetSourceFilters); !ok {
 		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
 	}
 	return
@@ -226,5 +214,18 @@ func (c *Client) MoveSourceFilter(req *requests.MoveSourceFilter) (err error) {
 
 func (c *Client) SetSourceFilterSettings(req *requests.SetSourceFilterSettings) (err error) {
 	_, err = c.submitRequest(requests.ForgeRequest(req))
+	return
+}
+
+func (c *Client) TakeSourceScreenshot(req *requests.TakeSourceScreenshot) (resp *responses.TakeSourceScreenshot, err error) {
+	raw, err := c.submitRequest(requests.ForgeRequestWithExpectedResponse(&responses.TakeSourceScreenshot{}, req))
+	if err != nil {
+		return
+	}
+
+	var ok bool
+	if resp, ok = raw.(*responses.TakeSourceScreenshot); !ok {
+		err = fmt.Errorf("obsws: unexpected response from server: %#v", resp)
+	}
 	return
 }
